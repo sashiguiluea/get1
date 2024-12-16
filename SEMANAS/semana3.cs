@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace MiProyectoCSharp
@@ -15,7 +14,9 @@ namespace MiProyectoCSharp
 
     public class semana3
     {
-        static List<Producto> productos = new List<Producto>();
+        // Definimos un array de productos de tamaño fijo, en este caso, 10
+        static Producto[] productos = new Producto[10];
+        static int contador = 0; // Control de la cantidad de productos agregados
 
         public static void MostrarMenuSemana3()
         {
@@ -23,7 +24,6 @@ namespace MiProyectoCSharp
             do
             {
                 Console.Clear();
-                encabezado.MostrarEncabezado();
                 Console.WriteLine("Menú de Productos");
                 Console.WriteLine("1. Agregar producto");
                 Console.WriteLine("2. Mostrar productos");
@@ -71,57 +71,69 @@ namespace MiProyectoCSharp
 
         public static void AgregarProducto()
         {
-            Console.Write("Ingrese el ID del producto: ");
-            int id = int.Parse(Console.ReadLine());
-
-            // Validar que el ID no exista
-            if (productos.Any(p => p.Id == id))
+            if (contador < productos.Length)  // Verificamos si hay espacio en la matriz
             {
-                Console.WriteLine("Ya existe un producto con ese ID.");
-                return;
+                Console.Write("Ingrese el ID del producto: ");
+                int id = int.Parse(Console.ReadLine());
+
+                // Validar que el ID no exista
+                if (productos.Any(p => p != null && p.Id == id))
+                {
+                    Console.WriteLine("Ya existe un producto con ese ID.");
+                    return;
+                }
+
+                Console.Write("Ingrese el nombre del producto: ");
+                string nombre = Console.ReadLine();
+
+                Console.Write("Ingrese el precio PVP: ");
+                decimal precioPVP = decimal.Parse(Console.ReadLine());
+
+                Console.Write("Ingrese el precio para proveedores: ");
+                decimal precioProvedores = decimal.Parse(Console.ReadLine());
+
+                Console.Write("Ingrese el precio de oferta: ");
+                decimal precioOferta = decimal.Parse(Console.ReadLine());
+
+                Producto nuevoProducto = new Producto
+                {
+                    Id = id,
+                    Nombre = nombre,
+                    PrecioPVP = precioPVP,
+                    PrecioProvedores = precioProvedores,
+                    PrecioOferta = precioOferta
+                };
+
+                productos[contador] = nuevoProducto;  // Guardamos el producto en la posición indicada por el contador
+                contador++;  // Incrementamos el contador
+
+                Console.WriteLine("Producto agregado correctamente.");
             }
-
-            Console.Write("Ingrese el nombre del producto: ");
-            string nombre = Console.ReadLine();
-
-            Console.Write("Ingrese el precio PVP: ");
-            decimal precioPVP = decimal.Parse(Console.ReadLine());
-
-            Console.Write("Ingrese el precio para proveedores: ");
-            decimal precioProvedores = decimal.Parse(Console.ReadLine());
-
-            Console.Write("Ingrese el precio de oferta: ");
-            decimal precioOferta = decimal.Parse(Console.ReadLine());
-
-            Producto nuevoProducto = new Producto
+            else
             {
-                Id = id,
-                Nombre = nombre,
-                PrecioPVP = precioPVP,
-                PrecioProvedores = precioProvedores,
-                PrecioOferta = precioOferta
-            };
-            productos.Add(nuevoProducto);
-
-            Console.WriteLine("Producto agregado correctamente.");
+                Console.WriteLine("No hay espacio suficiente para agregar más productos.");
+            }
         }
 
         public static void MostrarProductos()
         {
             Console.WriteLine("\nLista de Productos:");
-            if (productos.Count == 0)
+            if (contador == 0)
             {
                 Console.WriteLine("No hay productos registrados.");
             }
             else
             {
-                foreach (var producto in productos)
+                for (int i = 0; i < contador; i++)  // Recorremos hasta el número de productos agregados
                 {
-                    Console.WriteLine($"ID: {producto.Id}");
-                    Console.WriteLine($"Nombre: {producto.Nombre}");
-                    Console.WriteLine($"Precio PVP: {producto.PrecioPVP:C}");
-                    Console.WriteLine($"Precio Proveedores: {producto.PrecioProvedores:C}");
-                    Console.WriteLine($"Precio Oferta: {producto.PrecioOferta:C}");
+                    if (productos[i] != null)  // Verificamos que el producto no sea null
+                    {
+                        Console.WriteLine($"ID: {productos[i].Id}");
+                        Console.WriteLine($"Nombre: {productos[i].Nombre}");
+                        Console.WriteLine($"Precio PVP: {productos[i].PrecioPVP:C}");
+                        Console.WriteLine($"Precio Proveedores: {productos[i].PrecioProvedores:C}");
+                        Console.WriteLine($"Precio Oferta: {productos[i].PrecioOferta:C}");
+                    }
                 }
             }
         }
@@ -131,7 +143,7 @@ namespace MiProyectoCSharp
             Console.Write("Ingrese el nombre del producto a buscar: ");
             string nombreABuscar = Console.ReadLine();
 
-            var productosEncontrados = productos.Where(p => p.Nombre.Contains(nombreABuscar, StringComparison.OrdinalIgnoreCase));
+            var productosEncontrados = productos.Where(p => p != null && p.Nombre.Contains(nombreABuscar, StringComparison.OrdinalIgnoreCase));
 
             if (productosEncontrados.Any())
             {
@@ -152,10 +164,18 @@ namespace MiProyectoCSharp
             Console.Write("Ingrese el ID del producto a eliminar: ");
             if (int.TryParse(Console.ReadLine(), out int idEliminar))
             {
-                Producto productoAEliminar = productos.FirstOrDefault(p => p.Id == idEliminar);
+                Producto productoAEliminar = productos.FirstOrDefault(p => p != null && p.Id == idEliminar);
                 if (productoAEliminar != null)
                 {
-                    productos.Remove(productoAEliminar);
+                    // Encontramos el producto a eliminar y lo desplazamos hacia la izquierda para llenar el vacío
+                    int index = Array.IndexOf(productos, productoAEliminar);
+                    for (int i = index; i < contador - 1; i++)
+                    {
+                        productos[i] = productos[i + 1];  // Desplazamos los productos a la izquierda
+                    }
+                    productos[contador - 1] = null;  // Limpiamos el último producto
+
+                    contador--;  // Decrementamos el contador
                     Console.WriteLine("Producto eliminado correctamente.");
                 }
                 else
@@ -174,13 +194,22 @@ namespace MiProyectoCSharp
             Console.Write("Ingrese el ID del producto a modificar: ");
             if (int.TryParse(Console.ReadLine(), out int idModificar))
             {
-                Producto productoAModificar = productos.FirstOrDefault(p => p.Id == idModificar);
+                Producto productoAModificar = productos.FirstOrDefault(p => p != null && p.Id == idModificar);
                 if (productoAModificar != null)
                 {
                     // Pedir los nuevos datos del producto y actualizarlos
                     Console.Write("Ingrese el nuevo nombre: ");
                     productoAModificar.Nombre = Console.ReadLine();
-                    // ... (Actualizar otros campos)
+
+                    Console.Write("Ingrese el nuevo precio PVP: ");
+                    productoAModificar.PrecioPVP = decimal.Parse(Console.ReadLine());
+
+                    Console.Write("Ingrese el nuevo precio para proveedores: ");
+                    productoAModificar.PrecioProvedores = decimal.Parse(Console.ReadLine());
+
+                    Console.Write("Ingrese el nuevo precio de oferta: ");
+                    productoAModificar.PrecioOferta = decimal.Parse(Console.ReadLine());
+
                     Console.WriteLine("Producto modificado correctamente.");
                 }
                 else
