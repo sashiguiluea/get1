@@ -66,7 +66,7 @@ namespace MiProyectoCSharp
             }
             Console.WriteLine(); // Añadir salto de línea después del texto
         }
-    }
+    }   
 
     
 }
