@@ -23,7 +23,6 @@ namespace MiProyectoCSharp
                 Console.WriteLine("");
                 encabezado.MostrarEncabezado();
                 Console.WriteLine("");
-                Console.WriteLine("Seleccione una opción:");
                 EscribirTextoConEfecto("Seleccione una opción:");
                 Console.WriteLine("1. Semana 2: Calcular área y perímetro de Figuras Geometricas");
                 Console.WriteLine("2. Semana 3: Matrices y Arrays");
